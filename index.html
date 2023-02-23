@@ -667,7 +667,7 @@ const num_to_scientific = (x) => {
 }
 
 const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
-  const form = state[group_id].forms[form_id]
+  const form = state.data[group_id].forms[form_id]
   const variables = form.variables
   
   // Update inputted variable
@@ -696,7 +696,7 @@ const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
 }
 
 const Reorder = (group_id, form_id, variable_id) => ( state, event ) => {
-  const form = state[group_id].forms[form_id]
+  const form = state.data[group_id].forms[form_id]
   const variables = form.variables
 
   // Move current variable to last in calculation order
@@ -714,7 +714,7 @@ const Reorder = (group_id, form_id, variable_id) => ( state, event ) => {
   return { ...state }
 }
 
-const compress_match = q => q.replaceAll(/\W/g,"")
+const compress_match = q => q.toLowerCase().replaceAll(/\W/g,"")
 const Filter = (state, event) => {
   state.filter = compress_match(event.target.value)
   return { ...state }
@@ -765,7 +765,7 @@ app({
           )),
       ])),
       input({id: "filter", type: "text", placeholder: "🔍", oninput: Filter}),
-      p([
+      p({id: "credits"}, [
         text("Made by "),
         a({href: "https://x-ing.space"}, text("Xing")),
         text(" in 2023 with "),
