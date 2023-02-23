@@ -17,6 +17,10 @@ h1, h2, h3 {
   margin: 0;
   padding: 0;
 }
+ul {
+  list-style: none;
+  padding: 0 1rem;
+}
 h1 {
   letter-spacing: -3px;
   color: black;
@@ -34,20 +38,26 @@ h1 {
   margin-bottom: 2rem;
 }
 .variable {
-  margin-top: 1rem;
+  margin-top: 1rem;  
 }
 .variable > label > * {
-  margin: 0 0.1rem;
+  margin-top: 0.5rem;
+  flex-grow: 1;
   display: inline-block;
-  text-align: right;
 }
-.variable > label > .name {
+.variable .name,
+.variable .prefix,
+.variable .symbol {
+  text-align: right;
+  margin: 0 0.1rem;
+}
+.variable .name {
   width: 10rem;
 }
-.variable > label > .prefix {
+.variable .prefix {
   width: 1.5rem;
 }
-.variable > label > .symbol {
+.variable .symbol {
   font-style: italic;
   font-weight: bold;
   font-family: Serif;
