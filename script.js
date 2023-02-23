@@ -6,6 +6,7 @@ import {
   label, form, input, select, option,
   ul, li,
   summary, details,
+  code,
 } from "./hyperapp-html.mjs"
 import Qty from "./quantities.mjs"
 
@@ -45,7 +46,7 @@ const data = {
             symbol: "d",
             value: 1000,
             unit: "parsecs",
-            formula: ({ m, M }) => ( Math.pow(10, (m - M + 5) / 5) ),
+            formula: ({ m, M }) => ( 10 ** ((m - M + 5) / 5) ),
           },
         },
       },
@@ -108,14 +109,14 @@ const data = {
             symbol: "L₁",
             value: 3e+11,
             unit: "Watts",
-            formula: ({ L2, M2, M1 }) => ( L2 * Math.pow(100, (M2 - M1) / 5) ),
+            formula: ({ L2, M2, M1 }) => ( L2 * (100 ** ((M2 - M1) / 5)) ),
           },
           L2: {
             name: "2's luminosity",
             symbol: "L₂",
             value: 3e+8,
             unit: "Watts",
-            formula: ({ L1, M2, M1 }) => ( L1 / Math.pow(100, (M2 - M1) / 5) ),
+            formula: ({ L1, M2, M1 }) => ( L1 / (100 ** ((M2 - M1) / 5)) ),
           },
           M1: {
             name: "1's magnitude",
@@ -144,10 +145,10 @@ const data = {
             value: 10,
             unit: "L⊙",
             formula: ({ M }) => ( 
-                inrange(0.00, M, 0.43) ? 0.23 * Math.pow(M, 2.3)
-              : inrange(0.43, M, 2.00) ? 1.00 * Math.pow(M, 4.0)
-              : inrange(2.00, M, 55.0) ? 1.40 * Math.pow(M, 3.5)
-              : inrange(55.0, M, 1000) ? 32000 * Math.pow(M, 1.0)
+                inrange(0.00, M, 0.43) ? 0.23 * (M ** 2.3)
+              : inrange(0.43, M, 2.00) ? 1.00 * (M ** 4.0)
+              : inrange(2.00, M, 55.0) ? 1.40 * (M ** 3.5)
+              : inrange(55.0, M, 1000) ? 32000 * (M ** 1.0)
               : NaN
             ),
           },
@@ -156,42 +157,35 @@ const data = {
             symbol: "M",
             value: 10,
             unit: "M⊙",
-            formula: ({ L }) => ( Math.pow(L/1.40, 1/3.5) ),
+            formula: ({ L }) => ( (L/1.40) ** (1/3.5) ),
           },
         },
       },
       "stefan-boltzmann": {
         name: "Stefan-Boltzmann Law",
         description: "relates an object's luminous flux to its temperature",
-        order: [ "T", "R", "F", "L" ],
+        order: [ "T", "R", "L" ],
         variables: {
           L: {
             name: "luminosity",
             symbol: "L",
             value: 10,
             unit: "Watts",
-            formula: ({ R, F }) => ( 4 * PI * (R*R) * F),
+            formula: ({ R, T }) => ( 4 * PI * R*R * STEFAN * T*T*T*T),
           },
           R: {
             name: "radius",
             symbol: "R",
             value: 10,
             unit: "meters",
-            formula: ({ L, F }) => ( Math.sqrt(L / (4 * PI * F)) ),
-          },
-          F: {
-            name: "flux",
-            symbol: "F",
-            value: 10,
-            unit: "Watts / meters²",
-            formula: ({ T }) => ( STEFAN * T*T*T*T )
+            formula: ({ L, T }) => ( (L / (4 * PI * STEFAN * T*T*T*T)) ** (1/2) ),
           },
           T: {
             name: "temperature",
             symbol: "T",
             value: 10,
             unit: "meters",
-            formula: ({ F }) => ( Math.pow(F/STEFAN, 0.25) ),
+            formula: ({ R, L }) => ( (L / (4 * PI * R*R * STEFAN)) ** (1/4) ),
           },
         },
       },
@@ -686,6 +680,14 @@ const unitDropdown = (props, unit) =>
   select(props, units[Qty(unit).kind()].map(u => 
     option({ selected: unit == u }, text(u))
   ))
+  
+const formula = (variable) => 
+  text(
+    variable.symbol +
+    variable.formula.toString()
+    .replaceAll("**","^")
+    .replace(/.*\=\>/," = ")
+  )
 
 app({
   init: { data, filter: "" },
@@ -700,36 +702,39 @@ app({
             compress_match(f.name).includes(filter) && li({class: "form", id: f_id}, form([
               details([
                 summary(h3(text(f.name))),
-                f.description && span(text(f.description))
+                f.description && p(text(f.description)),
+                code(formula(f.variables[f.order[0]]))
               ]),
               ul({class: "variables"}, Object.entries(f.variables).map(([v_id, v]) => 
                 li({class: "variable", id: v_id}, label([
                   span({class: "name"}, text(v.name)),
                   span({class: "prefix"}, text(v.prefix || '')),
-                  span({class: "symbol"}, text(v.symbol)),
-                  span(text("=")),
-                  input({
-                    type: "number", 
-                    name: "mantissa",
-                    class: sign(v.mantissa),
-                    step: 0.1,
-                    value: v.mantissa,
-                    oninput: Calculate(g_id, f_id, v_id),
-                    onfocus: Reorder(g_id, f_id, v_id),
-                  }),
-                  text(" × 10"),
-                  input({
-                    type: "number",
-                    name: "exponent",
-                    class: sign(v.exponent),
-                    step: 1,
-                    value: v.exponent,
-                    oninput: Calculate(g_id, f_id, v_id),
-                    onfocus: Reorder(g_id, f_id, v_id),
-                  }),
-                  v.unit && Qty.parse(v.unit) && unitDropdown({
-                    oninput: ChangeUnit(g_id, f_id, v_id)
-                  }, v.unit)
+                  span({class: "definition"}, [
+                    span({class: "symbol"}, text(v.symbol)),
+                    span(text("=")),
+                    input({
+                      type: "number", 
+                      name: "mantissa",
+                      class: sign(v.mantissa),
+                      step: 0.1,
+                      value: v.mantissa,
+                      oninput: Calculate(g_id, f_id, v_id),
+                      onfocus: Reorder(g_id, f_id, v_id),
+                    }),
+                    text(" × 10"),
+                    input({
+                      type: "number",
+                      name: "exponent",
+                      class: sign(v.exponent),
+                      step: 1,
+                      value: v.exponent,
+                      oninput: Calculate(g_id, f_id, v_id),
+                      onfocus: Reorder(g_id, f_id, v_id),
+                    }),
+                    v.unit && Qty.parse(v.unit) && unitDropdown({
+                      oninput: ChangeUnit(g_id, f_id, v_id)
+                    }, v.unit)
+                  ])
                 ]))
               ))
             ]))
