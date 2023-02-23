@@ -1,0 +1,143 @@
+<html>
+  <head>
+    <style>
+form {
+  display: flex;
+  flex-direction: column;
+}
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <script type="module">
+import { app } from "https://unpkg.com/hyperapp"
+import {
+  main,
+  h1, h2, h3,
+  button,
+  text,
+  section,
+  label,
+  form,
+  input,
+  ul, li,
+} from "https://unpkg.com/@hyperapp/html?module"
+
+const formulae = {
+  "distance-modulus": {
+    name: "distance modulus",
+    variables: {
+      µ: {
+        name: "distance modulus",
+        symbol: "µ",
+        value: 10,
+        formula: ({ m, M }) => ( m - M ),
+      },
+      m: {
+        name: "apparent magnitude",
+        symbol: "m",
+        value: 5,
+        formula: ({ µ, M }) => ( µ + M ),
+      },
+      M: {
+        name: "absolute magnitude",
+        symbol: "M",
+        value: -5,
+        formula: ({ µ, m }) => ( m - µ )
+      },
+      d: {
+        name: "distance",
+        symbol: "d",
+        value: 1000,
+        unit: "parsecs",
+        formula: ({ µ }) => ( Math.pow(10, (µ + 5) / 5) )
+      },
+    }
+  },
+  "small-angle": {
+    name: "small angle formula",
+    variables: {
+      θ: {
+        name: "angular diameter ",
+        symbol: "θ",
+        value: 10,
+        unit: "arcseconds",
+        formula: ({ d, D }) => ( 206265*d/D ),
+      },
+      d: {
+        name: "linear diameter",
+        symbol: "d",
+        value: 5,
+        unit: "$Length",
+        formula: ({ θ, D }) => ( θ*D/206265 ),
+      },
+      D: {
+        name: "distance",
+        symbol: "D",
+        value: -5,
+        unit: "$Length",
+        formula: ({ θ, d }) => ( d*206265/θ )
+      }
+    }
+  },
+  "parallax-distance": {
+    name: "parallax-distance",
+    variables: {
+      d: {
+        name: "distance",
+        symbol: "d",
+        value: 10,
+        unit: "parsecs",
+        formula: ({ p }) => ( 1/p ),
+      },
+      p: {
+        name: "parallax",
+        symbol: "p",
+        value: 0.1,
+        unit: "arcseconds",
+        formula: ({ d }) => ( 1/d ),
+      },
+    }
+  },
+}
+
+const Update = (form_id, variable_id) => ( state, event ) => {
+  const variables = state.formulae[form_id].variables
+  variables[variable_id].value = Number(event.target.value)
+  const inputs = Object.fromEntries(Object.entries(variables).map(
+    ([v_id, v]) => ([v_id, v.value])
+  ))
+  for(const v_id in variables) {
+    if(v_id == variable_id) continue
+    const v = variables[v_id]
+    v.value = v.formula(inputs)
+  }
+  return { ...state }
+}
+
+app({
+  init: { formulae },
+  view: ({ formulae }) =>
+    main([
+      h1(text('Astronomy Formulatron')),
+      h3(text('By Xing')),
+      ul(Object.entries(formulae).map(([f_id, f]) => 
+        li({id: f_id}, form([
+          text(f.name),
+          ul(Object.entries(f.variables).map(([v_id, v]) => 
+            li({id: f_id}, label([
+              text(v.name + " " + v.symbol + " = "),
+              input({ type: "number", value: v.value, oninput: Update(f_id, v_id) }),
+              v.unit && text(v.unit)
+            ]))
+          ))
+        ]))
+      ))
+    ])
+  ,
+  node: document.getElementById("app"),
+})
+
+    </script>
+  </body>
+</html>
