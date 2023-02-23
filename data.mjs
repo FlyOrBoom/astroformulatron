@@ -1,6 +1,7 @@
 const inrange = (a, x, b) => (a <= x) && (x <= b)
 const log10 = (x) => Math.log(x) / Math.log(10)
 const sqrt = (x) => Math.sqrt(x)
+const cbrt = (x) => Math.cbrt(x)
 
 const PI = Math.PI
 const G = 6.6743E-11 // SI
@@ -224,9 +225,9 @@ export const data = {
       },
       "leavitt-classical": {
         name: "period-luminosity relation (Leavitt Law), Classical Cepheids",
-        order: [ "P", "M_V" ],
+        order: [ "P", "Mv" ],
         variables: {
-          M_V: {
+          Mv: {
             name: "visual absolute magnitude",
             symbol: "Mᵥ",
             value: -4.05,
@@ -238,15 +239,15 @@ export const data = {
             symbol: "P",
             value: 10,
             unit: "days",
-            formula: ({ M_V }) => ( 10 ** ((M_V + 4.05)/(-2.43) + 1) ),
+            formula: ({ Mv }) => ( 10 ** ((Mv + 4.05)/(-2.43) + 1) ),
           },
         },
       },
       "leavitt-ii": {
         name: "period-luminosity relation (Leavitt Law), Type II Cepheids",
-        order: [ "P", "M_V" ],
+        order: [ "P", "Mv" ],
         variables: {
-          M_V: {
+          Mv: {
             name: "visual absolute magnitude",
             symbol: "Mᵥ",
             value: -2.66,
@@ -258,7 +259,7 @@ export const data = {
             symbol: "P",
             value: 10,
             unit: "days",
-            formula: ({ M_V }) => ( 10 ** ((M_V + 0.15)/(-2.81)) ),
+            formula: ({ Mv }) => ( 10 ** ((Mv + 0.15)/(-2.81)) ),
           },
         },
       },
@@ -369,6 +370,69 @@ export const data = {
             value: 37,
             unit: "newtons",
             formula: ({ m1, m2, r }) => ( G*m1*m2/r/r ),
+          },
+        },
+      },
+      "eccentricity": {
+        name: "eccentricity",
+        description: "relates the orbital eccentricity to the apoapsis and periapsis",
+        order: [ "e", "rp", "ra" ],
+        variables: {          
+          ra: {
+            name: "apoapsis",
+            symbol: "rₐ",
+            value: 3,
+            unit: "kilometers",
+            formula: ({ e, rp }) => ( rp * (1+e)/(1-e) ),
+          },
+          rp: {
+            name: "periapsis",
+            symbol: "rₚ",
+            value: 1,
+            unit: "kilometers",
+            formula: ({ e, ra }) => ( ra * (1-e)/(1+e) ),
+          },
+          e: {
+            name: "eccentricity",
+            symbol: "e",
+            value: 0.5,
+            unit: "",
+            formula: ({ ra, rp }) => ( (ra-rp) / (ra+rp) ),
+          },
+        },
+      },
+      "kepler": {
+        name: "Kepler's 3rd Law",
+        description: "relates the square of the period to the cube of the semi-major axis by total mass",
+        order: [ "P", "m2", "m1", "a" ],
+        variables: {          
+          a: {
+            name: "semi-major axis",
+            symbol: "a",
+            value: 4,
+            unit: "AUs",
+            formula: ({ P, m1, m2 }) => ( cbrt( (P**2) * (m1 + m2) ) ),
+          },
+          m1: {
+            name: "1's mass",
+            symbol: "m₁",
+            value: 1,
+            unit: "M⊙",
+            formula: ({ P, a, m2 }) => ( (a**3) / (P**2) - m2 ),
+          },
+          m2: {
+            name: "2's mass",
+            symbol: "m₂",
+            value: 0,
+            unit: "M⊙",
+            formula: ({ P, a, m1 }) => ( (a**3) / (P**2) - m1 ),
+          },
+          P: {
+            name: "orbital period",
+            symbol: "P",
+            value: 8,
+            unit: "years",
+            formula: ({ m1, m2, a }) => ( sqrt( (a**3) / (m1 + m2) ) ),
           },
         },
       },
