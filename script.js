@@ -61,7 +61,8 @@ const Calculate = (group_id, form_id, variable_id, self=false) => ( state, event
   ))
   
   // Calculate other variables in order
-  if(Object.values(values).every(val => isFinite(val)))
+  // Don't run if any variable besides the first-to-be-calculated is invalid
+  if(Object.keys(values).every(v_id => (v_id==form.order[0]) || isFinite(values[v_id])))
   for(const v_id of form.order) {
     if(v_id == variable_id && !self) continue
     const v = variables[v_id]
