@@ -24,6 +24,14 @@ import {
   ul, li,
 } from "https://unpkg.com/@hyperapp/html?module"
 
+const inrange = (a, x, b) => (a <= x) && (x <= b)
+const log10 = (x) => Math.log(x) / Math.log(10)
+
+const PI = Math.PI
+const STEFAN = 5.670374419E-8
+const WIEN = 2.897771955E-3
+const EDDINGTON = 3.2E4
+
 const formulae = {
   "distance-modulus": {
     name: "distance modulus",
@@ -54,7 +62,7 @@ const formulae = {
         unit: "parsecs",
         formula: ({ µ }) => ( Math.pow(10, (µ + 5) / 5) ),
       },
-    }
+    },
   },
   "small-angle": {
     name: "small angle formula",
@@ -80,8 +88,8 @@ const formulae = {
         value: -5,
         unit: "$Length",
         formula: ({ θ, d }) => ( d*206265/θ )
-      }
-    }
+      },
+    },
   },
   "parallax": {
     name: "parallax distance",
@@ -101,7 +109,7 @@ const formulae = {
         unit: "arcseconds",
         formula: ({ d }) => ( 1/d ),
       },
-    }
+    },
   },
   "magnitude-luminosity": {
     name: "magnitude-luminosity relation",
@@ -125,42 +133,246 @@ const formulae = {
         name: "magnitude A",
         symbol: "M_A",
         value: 10,
-        unit: "Watts",
-        formula: ({ L_A, L_B, M_B }) => ( M_B - 2.5 * Math.log(L_A / L_B) ),
+        unit: "",
+        formula: ({ L_A, L_B, M_B }) => ( M_B - 2.5 * log10(L_A / L_B) ),
       },
       M_B: {
         name: "magnitude B",
         symbol: "M_B",
         value: 10,
-        unit: "Watts",
-        formula: ({ L_A, L_B, M_A }) => ( M_A + 2.5 * Math.log(L_A / L_B) ),
+        unit: "",
+        formula: ({ L_A, L_B, M_A }) => ( M_A + 2.5 * log10(L_A / L_B) ),
       },
-    }
+    },
+  },
+  "mass-luminosity": {
+    name: "mass-luminosity relation",
+    order: [ "M", "L" ],
+    variables: {
+      L: {
+        name: "luminosity",
+        symbol: "L",
+        value: 10,
+        unit: "L⊙",
+        formula: ({ M }) => ( 
+            inrange(0.00, M, 0.43) ? 0.23 * Math.pow(M, 2.3)
+          : inrange(0.43, M, 2.00) ? 1.00 * Math.pow(M, 4.0)
+          : inrange(2.00, M, 55.0) ? 1.40 * Math.pow(M, 3.5)
+          : inrange(55.0, M, 1000) ? 32000 * Math.pow(M, 1.0)
+          : NaN
+        ),
+      },
+      M: {
+        name: "mass",
+        symbol: "M",
+        value: 10,
+        unit: "M⊙",
+        formula: ({ L }) => ( Math.pow(L/1.40, 1/3.5) ),
+      },
+    },
+  },
+  "stefan-boltzmann": {
+    name: "Stefan-Boltzmann Law",
+    order: [ "T", "R", "L" ],
+    variables: {
+      L: {
+        name: "luminosity",
+        symbol: "L",
+        value: 10,
+        unit: "Watts",
+        formula: ({ R, T }) => ( 4 * PI * STEFAN * (R*R) * (T*T*T*T) ),
+      },
+      R: {
+        name: "radius",
+        symbol: "R",
+        value: 10,
+        unit: "meters",
+        formula: ({ L, T }) => ( Math.sqrt(L / (4 * PI * STEFAN * (T*T*T*T))) ),
+      },
+      T: {
+        name: "radius",
+        symbol: "R",
+        value: 10,
+        unit: "meters",
+        formula: ({ L, R }) => ( Math.pow(L / (4 * PI * STEFAN * (R*R)), 0.25) ),
+      },
+    },
+  },
+  "stefan-boltzmann": {
+    name: "Stefan-Boltzmann Law",
+    order: [ "T", "R", "F", "L" ],
+    variables: {
+      L: {
+        name: "luminosity",
+        symbol: "L",
+        value: 10,
+        unit: "Watts",
+        formula: ({ R, F }) => ( 4 * PI * (R*R) * F),
+      },
+      R: {
+        name: "radius",
+        symbol: "R",
+        value: 10,
+        unit: "meters",
+        formula: ({ L, F }) => ( Math.sqrt(L / (4 * PI * F)) ),
+      },
+      F: {
+        name: "flux",
+        symbol: "F",
+        value: 10,
+        unit: "Watts / meters²",
+        formula: ({ T }) => ( STEFAN * T*T*T*T )
+      },
+      T: {
+        name: "temperature",
+        symbol: "T",
+        value: 10,
+        unit: "meters",
+        formula: ({ F }) => ( Math.pow(F/STEFAN, 0.25) ),
+      },
+    },
+  },
+  "wien": {
+    name: "Wien's Displacement Law",
+    order: [ "T", "λ" ],
+    variables: {
+      λ: {
+        name: "wavelength",
+        symbol: "λ",
+        value: 0.05,
+        unit: "meters",
+        formula: ({ T }) => ( WIEN / T ),
+      },
+      T: {
+        name: "temperature",
+        symbol: "T",
+        value: 0.06,
+        unit: "Kelvin",
+        formula: ({ λ }) => ( WIEN / λ ),
+      },
+    },
+  },
+  "eddington": {
+    name: "Eddington Luminosity",
+    order: [ "M", "L" ],
+    variables: {
+      L: {
+        name: "luminosity",
+        symbol: "L",
+        value: 32000,
+        unit: "L⊙",
+        formula: ({ M }) => ( EDDINGTON * M ),
+      },
+      M: {
+        name: "mass",
+        symbol: "M",
+        value: 1,
+        unit: "M⊙",
+        formula: ({ L }) => ( L / EDDINGTON ),
+      },
+    },
+  },
+  "leavitt-classical": {
+    name: "period-luminosity relation (Leavitt Law), Classical Cepheids",
+    order: [ "P", "M_V" ],
+    variables: {
+      M_V: {
+        name: "visual absolute magnitude",
+        symbol: "M_V",
+        value: -4.05,
+        unit: "",
+        formula: ({ P }) => ( -2.43 * (log10(P) - 1) - 4.05 ),
+      },
+      P: {
+        name: "period",
+        symbol: "P",
+        value: 10,
+        unit: "days",
+        formula: ({ M_V }) => ( Math.pow(10, (M_V + 4.05)/(-2.43) + 1) ),
+      },
+    },
+  },
+  "leavitt-ii": {
+    name: "period-luminosity relation (Leavitt Law), Type II Cepheids",
+    order: [ "P", "M_V" ],
+    variables: {
+      M_V: {
+        name: "visual absolute magnitude",
+        symbol: "M_V",
+        value: -2.66,
+        unit: "",
+        formula: ({ P }) => ( -2.81 * log10(P) + 0.15 ),
+      },
+      P: {
+        name: "period",
+        symbol: "P",
+        value: 10,
+        unit: "days",
+        formula: ({ M_V }) => ( Math.pow(10, (M_V + 0.15)/(-2.81)) ),
+      },
+    },
+  },
+  "lifespan": {
+    name: "lifespan",
+    order: [ "M", "t" ],
+    variables: {
+      t: {
+        name: "lifespan",
+        symbol: "t",
+        value: 10000000000,
+        unit: "years",
+        formula: ({ M }) => ( Math.pow(M, 2.5) * 1E10 ),
+      },
+      M: {
+        name: "mass",
+        symbol: "M",
+        value: 10,
+        unit: "M⊙",
+        formula: ({ t }) => ( Math.pow(t*1E-10, 1/2.5) ),
+      },
+    },
   },
 }
 
-const Update = (form_id, variable_id) => ( state, event ) => {
+const Calculate = (form_id, variable_id) => ( state, event ) => {
   const form = state.formulae[form_id]
   const variables = form.variables
-  variables[variable_id].value = Number(event.target.value)
+  
+  // Update inputted variable
+  variables[variable_id].value = event.target.value
   
   // Flatten values of variables
   const values = Object.fromEntries(Object.entries(variables).map(
-    ([v_id, v]) => ([v_id, v.value])
+    ([v_id, v]) => ([v_id, Number(v.value)])
   ))
-  
-  // Move current variable to last in calculation order
-  // The variables that have been manually inputted more recently are thus held more constant
-  form.order.push(form.order.splice(form.order.indexOf(variable_id), 1)[0])
-  
+    
   // Calculate other variables in order
   for(const v_id of form.order) {
     if(v_id == variable_id) continue
     console.log(v_id)
     const v = variables[v_id]
-    values[v_id] = v.formula(values)
+    values[v_id] = Number(v.formula(values))
     v.value = values[v_id]
   }
+  return { ...state }
+}
+
+const Reorder = (form_id, variable_id) => ( state, event ) => {
+  const form = state.formulae[form_id]
+  const variables = form.variables
+
+  // Move current variable to last in calculation order
+  form.order.push(form.order.splice(form.order.indexOf(variable_id), 1)[0])
+  
+  for(const v_id of form.order) {
+    const i = form.order.indexOf(v_id) / (form.order.length - 1)
+    variables[v_id].prefix = (
+        i == 1 ? '➡️ '
+      : i == 0 ? '⭐ '
+      : ''
+    )
+  }
+  
   return { ...state }
 }
 
@@ -175,9 +387,14 @@ app({
           text(f.name),
           ul(Object.entries(f.variables).map(([v_id, v]) => 
             li({id: f_id}, label([
-              text('[' + f.order.indexOf(v_id) + '] '),
+              text(v.prefix || '🌃 '),
               text(v.name + " " + v.symbol + " = "),
-              input({ type: "number", value: v.value, oninput: Update(f_id, v_id) }),
+              input({
+                type: "number", 
+                value: v.value,
+                oninput: Calculate(f_id, v_id),
+                onfocus: Reorder(f_id, v_id),
+              }),
               v.unit && text(v.unit)
             ]))
           ))
