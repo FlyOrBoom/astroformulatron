@@ -1,0 +1,98 @@
+html, body {
+  background: #222;
+  color: #ddd;
+  font-size: 18px;
+  margin: 0;
+  padding: 0;
+  font-family: Helvetica, Roboto;
+}
+::selection{
+  color: black;
+  background: plum;
+}
+main {
+  padding: 1rem;
+}
+h1, h2, h3 {
+  margin: 0;
+  padding: 0;
+}
+h1 {
+  letter-spacing: -3px;
+  color: black;
+  background: white;
+}
+#filter {
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  border: 2px solid #888;
+  padding: 0.2rem;
+  border-radius: 0.3rem;
+}
+.form {
+  margin-bottom: 2rem;
+}
+.variable {
+  margin-top: 1rem;
+}
+.variable > label > * {
+  margin: 0 0.1rem;
+  display: inline-block;
+  text-align: right;
+}
+.variable > label > .name {
+  width: 10rem;
+}
+.variable > label > .prefix {
+  width: 1.5rem;
+}
+.variable > label > .symbol {
+  font-style: italic;
+  font-weight: bold;
+  font-family: Serif;
+  font-size: 1.2rem;
+  width: 1.5rem;
+  text-align: right;
+  color: white;
+}
+input {
+  background: black;
+  font-size: inherit;
+  font-family: inherit;
+  border-radius: 0.2rem;
+  border: none;
+  color: white;
+}
+input[type=number] {
+  text-align: right;
+  width: 5rem;
+  font-family: Monospace, monospace;
+}
+input[name=exponent] {
+  transform: translateY(-0.5rem);
+  font-size: 0.9rem;
+  width: 3rem;
+}
+input.positive { color: paleturquoise; }
+input.zero { color: #888; }
+input.negative { color: pink; }
+input.invalid { background: maroon; }
+a, a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover, a:focus {
+  text-decoration: underline;
+}
+h3 {
+  display: inline;
+  cursor: pointer;
+}
+details > span {
+  font-family: serif;
+  color: #ccc;
+}
+#credits a {
+  font-weight: bold;
+}
