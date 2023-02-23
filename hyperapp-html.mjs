@@ -1,4 +1,4 @@
-import { h } from "/hyperapp.mjs";
+import { h } from "./hyperapp.mjs";
 
 const EMPTY_ARR = [];
 const EMPTY_OBJ = {};
