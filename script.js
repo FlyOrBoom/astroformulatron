@@ -135,7 +135,7 @@ const data = {
         },
       },
       "mass-luminosity": {
-        name: "mass-luminosity relation",
+        name: "mass-luminosity relation, main-sequence",
         description: "relates a main-sequence star's mass to its luminosity",
         order: [ "M", "L" ],
         variables: {
@@ -150,7 +150,8 @@ const data = {
               : inrange(2.00, M, 55.0) ? 1.40 * (M ** 3.5)
               : inrange(55.0, M, 1000) ? 32000 * (M ** 1.0)
               : NaN
-            ),
+            ), // TODO: implement
+            formula: ({ M }) => 1.40 * (M ** 3.5)
           },
           M: {
             name: "mass",
@@ -320,21 +321,21 @@ const data = {
             name: "1's mass",
             symbol: "m₁",
             value: 1,
-            unit: "$Mass",
+            unit: "kilograms",
             formula: ({ m2, x1, x2, X }) => ( m2 * (x2 - X) / (X - x1) ),
           },
           m2: {
             name: "2's mass",
             symbol: "m₂",
             value: 1,
-            unit: "$Mass",
+            unit: "kilograms",
             formula: ({ m1, x1, x2, X }) => ( m1 * (x1 - X) / (X - x2) ),
           },          
           µ: {
             name: "reduced mass",
             symbol: "µ",
             value: 5e-1,
-            unit: "Mass",
+            unit: "kilograms",
             formula: ({ m1, m2 }) => ( m1*m2 / (m1+m2) ),
           },
           X: {
@@ -376,7 +377,7 @@ const data = {
             name: "gravitational force",
             symbol: "F",
             value: 37,
-            unit: "Newtons",
+            unit: "Newton",
             formula: ({ m1, m2, r }) => ( G*m1*m2/r/r ),
           },
         },
@@ -493,7 +494,7 @@ const data = {
             name: "Hubble constant",
             symbol: "H",
             value: 1,
-            unit: "kilometers/second/megaparsec",
+            unit: "kilometers/second*megaparsec",
             formula: ({ t }) => ( 1e12 / t ),
           }
         },
@@ -586,7 +587,6 @@ for (const group_id in data) {
       variable.exponent = scientific.exponent
       variable.default_unit = variable.unit
       variable.unit_ratio = 1
-      
       const i = form.order.indexOf(variable_id) / (form.order.length - 1)
       variable.prefix = (
           i == 1 ? '➡️'
@@ -663,9 +663,13 @@ const units = {
   length: [ "angstroms", "nanometers", "centimeters", "meters", "kilometers", "light-year", "parsecs", "kiloparsecs", "megaparsecs" ],
   angle: [ "degrees", "arcminutes", "arcseconds", "radians" ],
   time: [ "seconds", "days", "years" ],
+  power: [ "watts", "megawatts", "gigawatts", "terawatts", "L⊙" ],
+  force: [ "newton", "dyne" ],
+  temperature: [ "Kelvin", "Rankine" ],
   speed: [ "meters/second", "kilometers/second" ],
+  frequency: [ "hertz", "kilometers/second*megaparsec" ],
   angular_velocity: [ "arcseconds/year" ],
-  mass: [ "kilograms" ]
+  mass: [ "kilograms", "M⊙" ]
 }
 const ChangeUnit = (group_id, form_id, variable_id) => (state, event) => {
   const form = state.data[group_id].forms[form_id]
@@ -673,7 +677,7 @@ const ChangeUnit = (group_id, form_id, variable_id) => (state, event) => {
   
   const v = variables[variable_id]
   v.unit = event.target.value
-  v.unit_ratio = Qty(v.unit).div(Qty(v.default_unit)).toFloat()
+  v.unit_ratio = Qty(v.unit.toLowerCase()).div(Qty(v.default_unit.toLowerCase())).toFloat()
   return Calculate(group_id, form_id, variable_id)(state, event)
 }
 const unitDropdown = (props, unit) => 
