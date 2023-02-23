@@ -8,7 +8,6 @@ import {
   summary, details,
   code,
 } from "./hyperapp-html.mjs"
-import Qty from "./quantities.mjs"
 
 const inrange = (a, x, b) => (a <= x) && (x <= b)
 const log10 = (x) => Math.log(x) / Math.log(10)
@@ -108,14 +107,14 @@ const data = {
             name: "1's luminosity",
             symbol: "L₁",
             value: 3e+11,
-            unit: "Watts",
+            unit: "watts",
             formula: ({ L2, M2, M1 }) => ( L2 * (100 ** ((M2 - M1) / 5)) ),
           },
           L2: {
             name: "2's luminosity",
             symbol: "L₂",
             value: 3e+8,
-            unit: "Watts",
+            unit: "watts",
             formula: ({ L1, M2, M1 }) => ( L1 / (100 ** ((M2 - M1) / 5)) ),
           },
           M1: {
@@ -171,7 +170,7 @@ const data = {
             name: "luminosity",
             symbol: "L",
             value: 10,
-            unit: "Watts",
+            unit: "watts",
             formula: ({ R, T }) => ( 4 * PI * R*R * STEFAN * T*T*T*T),
           },
           R: {
@@ -206,7 +205,7 @@ const data = {
             name: "temperature",
             symbol: "T",
             value: 0.06,
-            unit: "Kelvin",
+            unit: "kelvins",
             formula: ({ λ }) => ( WIEN / λ ),
           },
         },
@@ -377,7 +376,7 @@ const data = {
             name: "gravitational force",
             symbol: "F",
             value: 37,
-            unit: "Newton",
+            unit: "newtons",
             formula: ({ m1, m2, r }) => ( G*m1*m2/r/r ),
           },
         },
@@ -494,7 +493,7 @@ const data = {
             name: "Hubble constant",
             symbol: "H",
             value: 1,
-            unit: "kilometers/second*megaparsec",
+            unit: "kilometers/second/megaparsec",
             formula: ({ t }) => ( 1e12 / t ),
           }
         },
@@ -606,7 +605,7 @@ const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
   //console.log(event.target.name)
   const v = variables[variable_id]
   v[event.target.name] = event.target.value
-  v.value = v.mantissa * Math.pow(10, v.exponent) / v.unit_ratio
+  v.value = v.mantissa * Math.pow(10, v.exponent) * v.unit_ratio
   
   // Flatten values of variables
   const values = Object.fromEntries(Object.entries(variables).map(
@@ -620,7 +619,7 @@ const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
     let val = Number(v.formula(values))
     values[v_id] = val
     v.value = val
-    const scientific = num_to_scientific(val * v.unit_ratio)
+    const scientific = num_to_scientific(val / v.unit_ratio)
     v.mantissa = Number(scientific.mantissa.toPrecision(5))
     v.exponent = scientific.exponent
   }
@@ -660,28 +659,84 @@ const sign = x => ({
 })
 
 const units = {
-  length: [ "angstroms", "nanometers", "centimeters", "meters", "kilometers", "light-year", "parsecs", "kiloparsecs", "megaparsecs" ],
-  angle: [ "degrees", "arcminutes", "arcseconds", "radians" ],
-  time: [ "seconds", "days", "years" ],
-  power: [ "watts", "megawatts", "gigawatts", "terawatts", "L⊙" ],
-  force: [ "newton", "dyne" ],
-  temperature: [ "Kelvin", "Rankine" ],
-  speed: [ "meters/second", "kilometers/second" ],
-  frequency: [ "hertz", "kilometers/second*megaparsec" ],
-  angular_velocity: [ "arcseconds/year" ],
-  mass: [ "kilograms", "M⊙" ]
+  length: { // base: meters
+    "angstroms": 1e-10,
+    "nanometers": 1e-9, 
+    "centimeters": 1e-2,
+    "meters": 1,
+    "kilometers": 1e+3, 
+    "R⊙": 6.957e+8, 
+    "AUs": 1.496e+11, 
+    "light-years": 9.461e+15, 
+    "parsecs": 3.086e+16, 
+    "kiloparsecs": 3.086e+19,
+    "megaparsecs": 3.086e+22,
+  },
+  angle: { // base: degrees
+    "milliarcseconds": 1e-3/360,
+    "arcseconds": 1/360,
+    "arcminutes": 1/60,
+    "degrees": 1,
+    "radians": 180/PI,
+  },
+  time: { // base: seconds
+    "seconds": 1,
+    "minutes": 60,
+    "hours": 360,
+    "days": 86400,
+    "years": 31557600,
+  },
+  power: { // base: watts
+    "watts": 1,
+    "megawatts": 1e6,
+    "gigawatts": 1e9,
+    "terawatts": 1e12,
+    "L⊙": 3.828e+26,
+  },
+  force: { // base: newtons
+    "dynes": 1e-5,
+    "newtons": 1,
+  },
+  temperature: { // base: kelvins
+    "kelvins": 1,
+    "rankines": 5/9,
+    "T⊙": 5778,
+  },
+  speed: { // base: m/s
+    "meters/second": 1,
+    "kilometers/second": 1e3,
+  },
+  frequency: { // base: hertz
+    "hertz": 1,
+    "kilometers/second/megaparsec": 3.086e+19,
+  },
+  angular_speed: { // base: degrees per second
+    "degrees/second": 1,
+    "arcseconds/year": 87660,
+  },
+  mass: { // base: kilograms
+    "grams": 1e-3,
+    "kilograms": 1,
+    "M⊙": 1.9891e+30,
+  }
 }
+
+const kind_of_unit = (unit) => Object.keys(units)
+  .find(kind => Object.keys(units[kind]).includes(unit))
+  
+const factor_of_unit = (unit) => units[kind_of_unit(unit)][unit]
+
 const ChangeUnit = (group_id, form_id, variable_id) => (state, event) => {
   const form = state.data[group_id].forms[form_id]
   const variables = form.variables
   
   const v = variables[variable_id]
   v.unit = event.target.value
-  v.unit_ratio = Qty(v.unit.toLowerCase()).div(Qty(v.default_unit.toLowerCase())).toFloat()
+  v.unit_ratio = factor_of_unit(v.unit) / factor_of_unit(v.default_unit)
   return Calculate(group_id, form_id, variable_id)(state, event)
 }
-const unitDropdown = (props, unit) => 
-  select(props, units[Qty(unit).kind()].map(u => 
+const unitDropdown = (props, unit) =>
+  select(props, Object.keys(units[kind_of_unit(unit)]).map(u => 
     option({ selected: unit == u }, text(u))
   ))
   
@@ -735,7 +790,7 @@ app({
                       oninput: Calculate(g_id, f_id, v_id),
                       onfocus: Reorder(g_id, f_id, v_id),
                     }),
-                    v.unit && Qty.parse(v.unit) && unitDropdown({
+                    v.unit && unitDropdown({
                       oninput: ChangeUnit(g_id, f_id, v_id)
                     }, v.unit)
                   ])
@@ -750,8 +805,6 @@ app({
         a({href: "https://x-ing.space"}, text("Xing")),
         text(" in 2023 with "),
         a({href: "https://github.com/jorgebucaran/hyperapp"}, text("Hyperapp")),
-        text(", "),
-        a({href: "https://github.com/gentooboontoo/js-quantities"}, text("JS-quantities")),
         text(" and "),
         a({href: "https://flems.io"}, text("flems.io")),
         text(". Released to the public domain under CC0. "),
