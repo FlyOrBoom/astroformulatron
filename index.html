@@ -10,6 +10,7 @@ form {
   <body>
     <main id="app"></main>
     <script type="module">
+
 import { app } from "https://unpkg.com/hyperapp"
 import {
   main,
@@ -26,6 +27,7 @@ import {
 const formulae = {
   "distance-modulus": {
     name: "distance modulus",
+    order: [ "d" , "M", "m", "µ" ],
     variables: {
       µ: {
         name: "distance modulus",
@@ -43,19 +45,20 @@ const formulae = {
         name: "absolute magnitude",
         symbol: "M",
         value: -5,
-        formula: ({ µ, m }) => ( m - µ )
+        formula: ({ µ, m }) => ( m - µ ),
       },
       d: {
         name: "distance",
         symbol: "d",
         value: 1000,
         unit: "parsecs",
-        formula: ({ µ }) => ( Math.pow(10, (µ + 5) / 5) )
+        formula: ({ µ }) => ( Math.pow(10, (µ + 5) / 5) ),
       },
     }
   },
   "small-angle": {
     name: "small angle formula",
+    order: [ "D", "d", "θ" ],
     variables: {
       θ: {
         name: "angular diameter ",
@@ -80,8 +83,9 @@ const formulae = {
       }
     }
   },
-  "parallax-distance": {
-    name: "parallax-distance",
+  "parallax": {
+    name: "parallax distance",
+    order: [ "p", "d" ],
     variables: {
       d: {
         name: "distance",
@@ -99,18 +103,63 @@ const formulae = {
       },
     }
   },
+  "magnitude-luminosity": {
+    name: "magnitude-luminosity relation",
+    order: [ "M_B", "M_A", "L_B", "L_A" ],
+    variables: {
+      L_A: {
+        name: "luminosity A",
+        symbol: "L_A",
+        value: 10,
+        unit: "Watts",
+        formula: ({ L_B, M_B, M_A }) => ( L_B * Math.pow(100, (M_B - M_A) / 5) ),
+      },
+      L_B: {
+        name: "luminosity B",
+        symbol: "L_B",
+        value: 10,
+        unit: "Watts",
+        formula: ({ L_A, M_B, M_A }) => ( L_A / Math.pow(100, (M_B - M_A) / 5) ),
+      },
+      M_A: {
+        name: "magnitude A",
+        symbol: "M_A",
+        value: 10,
+        unit: "Watts",
+        formula: ({ L_A, L_B, M_B }) => ( M_B - 2.5 * Math.log(L_A / L_B) ),
+      },
+      M_B: {
+        name: "magnitude B",
+        symbol: "M_B",
+        value: 10,
+        unit: "Watts",
+        formula: ({ L_A, L_B, M_A }) => ( M_A + 2.5 * Math.log(L_A / L_B) ),
+      },
+    }
+  },
 }
 
 const Update = (form_id, variable_id) => ( state, event ) => {
-  const variables = state.formulae[form_id].variables
+  const form = state.formulae[form_id]
+  const variables = form.variables
   variables[variable_id].value = Number(event.target.value)
-  const inputs = Object.fromEntries(Object.entries(variables).map(
+  
+  // Flatten values of variables
+  const values = Object.fromEntries(Object.entries(variables).map(
     ([v_id, v]) => ([v_id, v.value])
   ))
-  for(const v_id in variables) {
+  
+  // Move current variable to last in calculation order
+  // The variables that have been manually inputted more recently are thus held more constant
+  form.order.push(form.order.splice(form.order.indexOf(variable_id), 1)[0])
+  
+  // Calculate other variables in order
+  for(const v_id of form.order) {
     if(v_id == variable_id) continue
+    console.log(v_id)
     const v = variables[v_id]
-    v.value = v.formula(inputs)
+    values[v_id] = v.formula(values)
+    v.value = values[v_id]
   }
   return { ...state }
 }
@@ -119,13 +168,14 @@ app({
   init: { formulae },
   view: ({ formulae }) =>
     main([
-      h1(text('Astronomy Formulatron')),
-      h3(text('By Xing')),
+      h1(text('ASTROFORMULATRON')),
+      h3(text('An astronomy calculator by Xing')),
       ul(Object.entries(formulae).map(([f_id, f]) => 
         li({id: f_id}, form([
           text(f.name),
           ul(Object.entries(f.variables).map(([v_id, v]) => 
             li({id: f_id}, label([
+              text('[' + f.order.indexOf(v_id) + '] '),
               text(v.name + " " + v.symbol + " = "),
               input({ type: "number", value: v.value, oninput: Update(f_id, v_id) }),
               v.unit && text(v.unit)
