@@ -1,5 +1,6 @@
 const inrange = (a, x, b) => (a <= x) && (x <= b)
 const log10 = (x) => Math.log(x) / Math.log(10)
+const sqrt = (x) => Math.sqrt(x)
 
 const PI = Math.PI
 const G = 6.6743E-11 // SI
@@ -7,6 +8,7 @@ const STEFAN = 5.670374419E-8 // SI
 const WIEN = 2.897771955E-3 // SI
 const EDDINGTON = 3.2E4 // solar units
 const HUBBLE = 70 // km/s/Mpc
+const LIGHT_SPEED = 299792458 // SI
 
 export const data = {
   "stellar-relations": {
@@ -167,7 +169,7 @@ export const data = {
             symbol: "R",
             value: 10,
             unit: "meters",
-            formula: ({ L, T }) => ( (L / (4 * PI * STEFAN * (T**4))) ** (1/2) ),
+            formula: ({ L, T }) => ( sqrt(L / (4 * PI * STEFAN * (T**4))) ),
           },
           T: {
             name: "temperature",
@@ -468,7 +470,7 @@ export const data = {
       },
       "universe-age": {
         name: "age of the universe",
-        description: "relates the age of the universe to Hubble Constant",
+        description: "relates the age of the universe to the Hubble Constant",
         order: [ "H", "t" ],
         variables: {
           t: {
@@ -476,20 +478,20 @@ export const data = {
             symbol: "t",
             value: 1,
             unit: "years",
-            formula: ({ H }) => ( 1e12 / H ),
+            formula: ({ H }) => ( 1e+12 / H ),
           },
           H: {
             name: "Hubble constant",
             symbol: "H",
             value: 1,
             unit: "kilometers/second/megaparsec",
-            formula: ({ t }) => ( 1e12 / t ),
+            formula: ({ t }) => ( 1e+12 / t ),
           }
         },
       },
-      "z-factor": {
-        name: "z-factor",
-        description: "relates the z-factor to wavelength dilation from the cosmic microwave background",
+      "redshift": {
+        name: "redshift",
+        description: "relates the redshift to wavelength dilation from the cosmic microwave background",
         order: [ "z", "λ", "λ0" ],
         variables: {
           λ: {
@@ -507,11 +509,32 @@ export const data = {
             formula: ({ λ, z }) => ( λ/(z + 1) ),
           },
           z: {
-            name: "z-factor",
+            name: "redshift",
             symbol: "z",
             value: 1,
             unit: "",
             formula: ({ λ, λ0 }) => ( λ/λ0 - 1 ),
+          },
+        },
+      },
+      "lorentz-factor": {
+        name: "Lorentz factor",
+        description: "relates the Lorentz factor (time dilation, length contraction) to relative speed",
+        order: [ "γ", "v" ],
+        variables: {
+          v: {
+            name: "relative speed",
+            symbol: "v",
+            value: 0.8,
+            unit: "c",
+            formula: ({ γ }) => ( sqrt(1 - 1/(γ ** 2)) ),
+          },
+          γ: {
+            name: "Lorentz factor",
+            symbol: "γ",
+            value: 0.36,
+            unit: "",
+            formula: ({ v }) => ( 1/sqrt(1 - (v**2)) ),
           },
         },
       },
