@@ -1,16 +1,25 @@
 <html>
   <head>
     <style>
+html, body {
+  background: #222;
+  color: #eee;
+  font-size: 18px;
+  font-family: Helvetica, Roboto;
+}
 form {
   display: flex;
   flex-direction: column;
+  gap: 5px;
+}
+input[type=number] {
+  text-align: right
 }
     </style>
   </head>
   <body>
     <main id="app"></main>
     <script type="module">
-
 import { app } from "https://unpkg.com/hyperapp"
 import {
   main,
@@ -399,11 +408,13 @@ app({
             ]))
           ))
         ]))
-      ))
+      )),
+      text("Made with hyperapp.js")
     ])
   ,
   node: document.getElementById("app"),
 })
+
 
     </script>
   </body>
