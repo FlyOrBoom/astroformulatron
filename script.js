@@ -171,21 +171,21 @@ const data = {
             symbol: "L",
             value: 10,
             unit: "watts",
-            formula: ({ R, T }) => ( 4 * PI * R*R * STEFAN * T*T*T*T),
+            formula: ({ R, T }) => ( 4 * PI * (R**2) * STEFAN * (T**4)),
           },
           R: {
             name: "radius",
             symbol: "R",
             value: 10,
             unit: "meters",
-            formula: ({ L, T }) => ( (L / (4 * PI * STEFAN * T*T*T*T)) ** (1/2) ),
+            formula: ({ L, T }) => ( (L / (4 * PI * STEFAN * (T**4))) ** (1/2) ),
           },
           T: {
             name: "temperature",
             symbol: "T",
             value: 10,
             unit: "meters",
-            formula: ({ R, L }) => ( (L / (4 * PI * R*R * STEFAN)) ** (1/4) ),
+            formula: ({ R, L }) => ( (L / (4 * PI * (R**2) * STEFAN)) ** (1/4) ),
           },
         },
       },
@@ -247,7 +247,7 @@ const data = {
             symbol: "P",
             value: 10,
             unit: "days",
-            formula: ({ M_V }) => ( Math.pow(10, (M_V + 4.05)/(-2.43) + 1) ),
+            formula: ({ M_V }) => ( 10 ** ((M_V + 4.05)/(-2.43) + 1) ),
           },
         },
       },
@@ -267,7 +267,7 @@ const data = {
             symbol: "P",
             value: 10,
             unit: "days",
-            formula: ({ M_V }) => ( Math.pow(10, (M_V + 0.15)/(-2.81)) ),
+            formula: ({ M_V }) => ( 10 ** ((M_V + 0.15)/(-2.81)) ),
           },
         },
       },
@@ -281,14 +281,14 @@ const data = {
             symbol: "t",
             value: 1e+10,
             unit: "years",
-            formula: ({ M }) => ( Math.pow(M, 2.5) * 1E10 ),
+            formula: ({ M }) => ( (M ** 2.5) * 1e+10 ),
           },
           M: {
             name: "mass",
             symbol: "M",
             value: 1e+1,
             unit: "M⊙",
-            formula: ({ t }) => ( Math.pow(t*1E-10, 1/2.5) ),
+            formula: ({ t }) => ( (t*1e-10) ** (1/2.5) ),
           },
         },
       },
@@ -565,7 +565,7 @@ const data = {
 
 const num_to_scientific = (x) => {
   const arr = Number
-  .parseFloat(x)
+  .parseFloat(x.toPrecision(5))
   .toExponential()
   .split("e")
   .map(n => Number.parseFloat(n))
@@ -582,7 +582,7 @@ for (const group_id in data) {
     for (const variable_id in form.variables) {
       const variable = form.variables[variable_id]
       const scientific = num_to_scientific(variable.value)
-      variable.mantissa = Number(scientific.mantissa.toPrecision(5))
+      variable.mantissa = scientific.mantissa
       variable.exponent = scientific.exponent
       variable.default_unit = variable.unit
       variable.unit_ratio = 1
@@ -620,7 +620,7 @@ const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
     values[v_id] = val
     v.value = val
     const scientific = num_to_scientific(val / v.unit_ratio)
-    v.mantissa = Number(scientific.mantissa.toPrecision(5))
+    v.mantissa = scientific.mantissa
     v.exponent = scientific.exponent
   }
   return { ...state }
