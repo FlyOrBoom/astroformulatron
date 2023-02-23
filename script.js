@@ -1,15 +1,12 @@
-import { app } from "https://unpkg.com/hyperapp"
+import { app, text } from "/hyperapp.mjs"
 import {
   main, section,
   h1, h2, h3,
-  text, span, a, p,
-  label,
-  form,
-  input,
+  span, a, p,
+  label, form, input, select, option,
   ul, li,
   summary, details,
-  select, option,
-} from "https://unpkg.com/@hyperapp/html?module"
+} from "/hyperapp-html.mjs"
 import Qty from "/quantities.mjs"
 
 const inrange = (a, x, b) => (a <= x) && (x <= b)
