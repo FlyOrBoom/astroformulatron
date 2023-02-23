@@ -1,5 +1,5 @@
 html, body {
-  background: #222;
+  background: #123;
   color: #ddd;
   font-size: 18px;
   margin: 0;
@@ -105,7 +105,7 @@ h3 {
   display: inline;
   cursor: pointer;
 }
-details > span {
+details > p {
   font-family: serif;
   color: #ccc;
 }
