@@ -115,7 +115,7 @@ const ChangeUnit = (group_id, form_id, variable_id) => (state, event) => {
   const v = variables[variable_id]
   v.unit = event.target.value
   v.unit_ratio = factorOfUnit(v.unit) / factorOfUnit(v.default_unit)
-  return Calculate(group_id, form_id, variable_id)(state, event)
+  return Calculate(group_id, form_id, variable_id, true)(state, event)
 }
 const unitDropdown = (props, unit) =>
   select(props, Object.keys(units[kindOfUnit(unit)]).map(u => 
