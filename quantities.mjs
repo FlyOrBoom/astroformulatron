@@ -263,6 +263,7 @@ var UNITS = {
   "<grain>" : [["grain","grains","gr"], 6.479891e-5, "mass", ["<kilogram>"]],
   "<dram>"  : [["dram","drams","dr"], 0.0017718452, "mass",["<kilogram>"]],
   "<stone>" : [["stone","stones","st"],6.35029318, "mass",["<kilogram>"]],
+  "<msol>": [["m⊙", "M⊙", "msun"], 1.98847+30, "mass", ["<kilogram>"]],
 
   /* area */
   "<hectare>":[["hectare"], 10000, "area", ["<meter>","<meter>"]],
@@ -397,7 +398,8 @@ var UNITS = {
   "<radian>" :[["rad","radian","radians"], 1.0, "angle", ["<radian>"]],
   "<degree>" :[["deg","degree","degrees"], Math.PI / 180.0, "angle", ["<radian>"]],
   "<arcminute>" :[["arcmin","arcminute","arcminutes"], Math.PI / 10800.0, "angle", ["<radian>"]],
-  "<arcsecond>" :[["arcsec","arcsecond","arcseconds"], Math.PI / 648000.0, "angle", ["<radian>"]],  "<gradian>"   :[["gon","grad","gradian","grads"], Math.PI / 200.0, "angle", ["<radian>"]],
+  "<arcsecond>" :[["arcsec","arcsecond","arcseconds"], Math.PI / 648000.0, "angle", ["<radian>"]],  
+  "<gradian>"   :[["gon","grad","gradian","grads"], Math.PI / 200.0, "angle", ["<radian>"]],
   "<steradian>"  : [["sr","steradian","steradians"], 1.0, "solid_angle", ["<steradian>"]],
 
   /* rotation */
@@ -426,6 +428,7 @@ var UNITS = {
   "<volt-ampere>"  : [["VA","volt-ampere"], 1.0, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
   "<volt-ampere-reactive>"  : [["var","Var","VAr","VAR","volt-ampere-reactive"], 1.0, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
   "<horsepower>"  :  [["hp","horsepower"], 745.699872, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
+  "<lsol>": [["l⊙", "L⊙", "lsun"], 3.828e+26, "power", ["<kilogram>","<meter>","<meter>"], ["<second>","<second>","<second>"]],
 
   /* radiation */
   "<gray>" : [["Gy","gray","grays"], 1.0, "radiation", ["<meter>","<meter>"], ["<second>","<second>"]],
