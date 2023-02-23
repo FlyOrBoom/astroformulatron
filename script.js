@@ -597,7 +597,7 @@ for (const group_id in data) {
 }
 
 
-const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
+const Calculate = (group_id, form_id, variable_id, self=false) => ( state, event ) => {
   const form = state.data[group_id].forms[form_id]
   const variables = form.variables
   
@@ -612,11 +612,12 @@ const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
     ([v_id, v]) => ([v_id, Number(v.value)])
   ))
   
-  // Calculate variables in order
+  // Calculate other variables in order
   if(Object.values(values).every(val => isFinite(val)))
   for(const v_id of form.order) {
+    if(v_id == variable_id && !self) continue
     const v = variables[v_id]
-    let val = Number(v.formula(values))
+    const val = Number(v.formula(values))
     values[v_id] = val
     v.value = val
     const scientific = num_to_scientific(val / v.unit_ratio)
@@ -778,6 +779,7 @@ app({
                       step: 0.1,
                       value: v.mantissa,
                       oninput: Calculate(g_id, f_id, v_id),
+                      onchange: Calculate(g_id, f_id, v_id, true),
                       onfocus: Reorder(g_id, f_id, v_id),
                     }),
                     text(" × 10"),
