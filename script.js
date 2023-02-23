@@ -1,4 +1,4 @@
-import { app, text } from "./hyperapp.mjs"
+import { app, text } from "/hyperapp.mjs"
 import {
   main, section,
   h1, h2, h3,
@@ -6,8 +6,8 @@ import {
   label, form, input, select, option,
   ul, li,
   summary, details,
-} from "./hyperapp-html.mjs"
-import Qty from "./quantities.mjs"
+} from "/hyperapp-html.mjs"
+import Qty from "/quantities.mjs"
 
 const inrange = (a, x, b) => (a <= x) && (x <= b)
 const log10 = (x) => Math.log(x) / Math.log(10)
@@ -740,9 +740,13 @@ app({
         text("Made by "),
         a({href: "https://x-ing.space"}, text("Xing")),
         text(" in 2023 with "),
-        a({href: "https://flems.io"}, text("flems.io")),
+        a({href: "https://github.com/jorgebucaran/hyperapp"}, text("Hyperapp")),
+        text(", "),
+        a({href: "https://github.com/gentooboontoo/js-quantities"}, text("JS-quantities")),
         text(" and "),
-        a({href: "https://github.com/jorgebucaran/hyperapp"}, text("hyperapp.js")),
+        a({href: "https://flems.io"}, text("flems.io")),
+        text(". Released to the public domain under CC0. "),
+        a({href: "https://github.com/flyorboom/astroformulatron"}, text("View the source code.")),
       ]),
     ])
   ,
