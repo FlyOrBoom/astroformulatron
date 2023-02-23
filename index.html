@@ -3,17 +3,49 @@
     <style>
 html, body {
   background: #222;
-  color: #eee;
+  color: #ddd;
   font-size: 18px;
   font-family: Helvetica, Roboto;
 }
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+.form {
+  margin: 2rem 0;
+}
+.variable {
+  margin: 1rem 0;
+}
+.variable > label > * {
+  margin: 0 0.1rem;
+  display: inline-block;
+  text-align: right;
+}
+.variable > label > .name {
+  width: 10rem;
+}
+.variable > label > .prefix {
+  width: 1.5rem;
+}
+.variable > label > .symbol {
+  font-style: italic;
+  font-weight: bold;
+  font-family: Serif;
+  font-size: 1.2rem;
+  width: 1.5rem;
+  text-align: right;
+  color: white;
 }
 input[type=number] {
-  text-align: right
+  text-align: right;
+  width: 5rem;
+  background: black;
+  font-size: inherit;
+  font-family: inherit;
+  border-radius: 0.2rem;
+  border: none;
+  color: white;
+}
+input[name=exponent] {
+  transform: translateY(-0.5rem);
+  font-size: 0.9rem;
 }
     </style>
   </head>
@@ -24,9 +56,7 @@ import { app } from "https://unpkg.com/hyperapp"
 import {
   main,
   h1, h2, h3,
-  button,
-  text,
-  section,
+  text, span,
   label,
   form,
   input,
@@ -49,25 +79,25 @@ const formulae = {
       µ: {
         name: "distance modulus",
         symbol: "µ",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         formula: ({ m, M }) => ( m - M ),
       },
       m: {
         name: "apparent magnitude",
         symbol: "m",
-        value: 5,
+        value: 5, mantissa: 5, exponent: 0,
         formula: ({ µ, M }) => ( µ + M ),
       },
       M: {
         name: "absolute magnitude",
         symbol: "M",
-        value: -5,
+        value: -5, mantissa: -5, exponent: 0,
         formula: ({ µ, m }) => ( m - µ ),
       },
       d: {
         name: "distance",
         symbol: "d",
-        value: 1000,
+        value: 1000, mantissa: 1, exponent: 3,
         unit: "parsecs",
         formula: ({ µ }) => ( Math.pow(10, (µ + 5) / 5) ),
       },
@@ -80,21 +110,21 @@ const formulae = {
       θ: {
         name: "angular diameter ",
         symbol: "θ",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "arcseconds",
         formula: ({ d, D }) => ( 206265*d/D ),
       },
       d: {
         name: "linear diameter",
         symbol: "d",
-        value: 5,
+        value: 5, mantissa: 5, exponent: 0,
         unit: "$Length",
         formula: ({ θ, D }) => ( θ*D/206265 ),
       },
       D: {
         name: "distance",
         symbol: "D",
-        value: -5,
+        value: -5, mantissa: -5, exponent: 0,
         unit: "$Length",
         formula: ({ θ, d }) => ( d*206265/θ )
       },
@@ -107,14 +137,14 @@ const formulae = {
       d: {
         name: "distance",
         symbol: "d",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "parsecs",
         formula: ({ p }) => ( 1/p ),
       },
       p: {
         name: "parallax",
         symbol: "p",
-        value: 0.1,
+        value: 0.1, mantissa: 1, exponent: -1,
         unit: "arcseconds",
         formula: ({ d }) => ( 1/d ),
       },
@@ -125,30 +155,30 @@ const formulae = {
     order: [ "M_B", "M_A", "L_B", "L_A" ],
     variables: {
       L_A: {
-        name: "luminosity A",
-        symbol: "L_A",
-        value: 10,
+        name: "1's luminosity",
+        symbol: "L₁",
+        value: 10, mantissa: 1, exponent: 1,
         unit: "Watts",
         formula: ({ L_B, M_B, M_A }) => ( L_B * Math.pow(100, (M_B - M_A) / 5) ),
       },
       L_B: {
-        name: "luminosity B",
-        symbol: "L_B",
-        value: 10,
+        name: "2's luminosity",
+        symbol: "L₂",
+        value: 10, mantissa: 1, exponent: 1,
         unit: "Watts",
         formula: ({ L_A, M_B, M_A }) => ( L_A / Math.pow(100, (M_B - M_A) / 5) ),
       },
       M_A: {
-        name: "magnitude A",
-        symbol: "M_A",
-        value: 10,
+        name: "1's magnitude",
+        symbol: "M₁",
+        value: 10, mantissa: 1, exponent: 1,
         unit: "",
         formula: ({ L_A, L_B, M_B }) => ( M_B - 2.5 * log10(L_A / L_B) ),
       },
       M_B: {
-        name: "magnitude B",
-        symbol: "M_B",
-        value: 10,
+        name: "2's magnitude",
+        symbol: "M₂",
+        value: 10, mantissa: 1, exponent: 1,
         unit: "",
         formula: ({ L_A, L_B, M_A }) => ( M_A + 2.5 * log10(L_A / L_B) ),
       },
@@ -161,7 +191,7 @@ const formulae = {
       L: {
         name: "luminosity",
         symbol: "L",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "L⊙",
         formula: ({ M }) => ( 
             inrange(0.00, M, 0.43) ? 0.23 * Math.pow(M, 2.3)
@@ -174,7 +204,7 @@ const formulae = {
       M: {
         name: "mass",
         symbol: "M",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "M⊙",
         formula: ({ L }) => ( Math.pow(L/1.40, 1/3.5) ),
       },
@@ -187,21 +217,21 @@ const formulae = {
       L: {
         name: "luminosity",
         symbol: "L",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "Watts",
         formula: ({ R, T }) => ( 4 * PI * STEFAN * (R*R) * (T*T*T*T) ),
       },
       R: {
         name: "radius",
         symbol: "R",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "meters",
         formula: ({ L, T }) => ( Math.sqrt(L / (4 * PI * STEFAN * (T*T*T*T))) ),
       },
       T: {
         name: "radius",
         symbol: "R",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "meters",
         formula: ({ L, R }) => ( Math.pow(L / (4 * PI * STEFAN * (R*R)), 0.25) ),
       },
@@ -214,28 +244,28 @@ const formulae = {
       L: {
         name: "luminosity",
         symbol: "L",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "Watts",
         formula: ({ R, F }) => ( 4 * PI * (R*R) * F),
       },
       R: {
         name: "radius",
         symbol: "R",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "meters",
         formula: ({ L, F }) => ( Math.sqrt(L / (4 * PI * F)) ),
       },
       F: {
         name: "flux",
         symbol: "F",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "Watts / meters²",
         formula: ({ T }) => ( STEFAN * T*T*T*T )
       },
       T: {
         name: "temperature",
         symbol: "T",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "meters",
         formula: ({ F }) => ( Math.pow(F/STEFAN, 0.25) ),
       },
@@ -248,14 +278,14 @@ const formulae = {
       λ: {
         name: "wavelength",
         symbol: "λ",
-        value: 0.05,
+        value: 0.05, mantissa: 5, exponent: -2,
         unit: "meters",
         formula: ({ T }) => ( WIEN / T ),
       },
       T: {
         name: "temperature",
         symbol: "T",
-        value: 0.06,
+        value: 0.06, mantissa: 6, exponent: -2,
         unit: "Kelvin",
         formula: ({ λ }) => ( WIEN / λ ),
       },
@@ -268,14 +298,14 @@ const formulae = {
       L: {
         name: "luminosity",
         symbol: "L",
-        value: 32000,
+        value: 32000, mantissa: 3.2, exponent: 4,
         unit: "L⊙",
         formula: ({ M }) => ( EDDINGTON * M ),
       },
       M: {
         name: "mass",
         symbol: "M",
-        value: 1,
+        value: 1, mantissa: 1, exponent: 0,
         unit: "M⊙",
         formula: ({ L }) => ( L / EDDINGTON ),
       },
@@ -287,15 +317,15 @@ const formulae = {
     variables: {
       M_V: {
         name: "visual absolute magnitude",
-        symbol: "M_V",
-        value: -4.05,
+        symbol: "Mᵥ",
+        value: -4.05, mantissa: -4.05, exponent: 0,
         unit: "",
         formula: ({ P }) => ( -2.43 * (log10(P) - 1) - 4.05 ),
       },
       P: {
         name: "period",
         symbol: "P",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "days",
         formula: ({ M_V }) => ( Math.pow(10, (M_V + 4.05)/(-2.43) + 1) ),
       },
@@ -307,15 +337,15 @@ const formulae = {
     variables: {
       M_V: {
         name: "visual absolute magnitude",
-        symbol: "M_V",
-        value: -2.66,
+        symbol: "Mᵥ",
+        value: -2.66, mantissa: -2.66, exponent: 0,
         unit: "",
         formula: ({ P }) => ( -2.81 * log10(P) + 0.15 ),
       },
       P: {
         name: "period",
         symbol: "P",
-        value: 10,
+        value: 10, mantissa: 1, exponent: 1,
         unit: "days",
         formula: ({ M_V }) => ( Math.pow(10, (M_V + 0.15)/(-2.81)) ),
       },
@@ -328,14 +358,14 @@ const formulae = {
       t: {
         name: "lifespan",
         symbol: "t",
-        value: 10000000000,
+        value: 1e+10, mantissa: 1, exponent: 10,
         unit: "years",
         formula: ({ M }) => ( Math.pow(M, 2.5) * 1E10 ),
       },
       M: {
         name: "mass",
         symbol: "M",
-        value: 10,
+        value: 1e+1, mantissa: 1, exponent: 1,
         unit: "M⊙",
         formula: ({ t }) => ( Math.pow(t*1E-10, 1/2.5) ),
       },
@@ -343,12 +373,26 @@ const formulae = {
   },
 }
 
+const num_to_scientific = (x) => {
+  const arr = Number
+  .parseFloat(x)
+  .toExponential()
+  .split("e")
+  .map(n => Number.parseFloat(n))
+  return {
+    mantissa: arr[0],
+    exponent: arr[1]
+  }
+}
+
 const Calculate = (form_id, variable_id) => ( state, event ) => {
   const form = state.formulae[form_id]
   const variables = form.variables
   
   // Update inputted variable
-  variables[variable_id].value = event.target.value
+  console.log(event.target.name)
+  variables[variable_id][event.target.name] = event.target.value
+  variables[variable_id].value = variables[variable_id].mantissa * Math.pow(10, variables[variable_id].exponent)
   
   // Flatten values of variables
   const values = Object.fromEntries(Object.entries(variables).map(
@@ -360,8 +404,12 @@ const Calculate = (form_id, variable_id) => ( state, event ) => {
     if(v_id == variable_id) continue
     console.log(v_id)
     const v = variables[v_id]
-    values[v_id] = Number(v.formula(values))
-    v.value = values[v_id]
+    const val = Number(v.formula(values))
+    values[v_id] = val
+    v.value = val
+    const scientific = num_to_scientific(val)
+    v.mantissa = scientific.mantissa
+    v.exponent = scientific.exponent
   }
   return { ...state }
 }
@@ -376,8 +424,8 @@ const Reorder = (form_id, variable_id) => ( state, event ) => {
   for(const v_id of form.order) {
     const i = form.order.indexOf(v_id) / (form.order.length - 1)
     variables[v_id].prefix = (
-        i == 1 ? '➡️ '
-      : i == 0 ? '⭐ '
+        i == 1 ? '➡️'
+      : i == 0 ? '⭐'
       : ''
     )
   }
@@ -390,17 +438,28 @@ app({
   view: ({ formulae }) =>
     main([
       h1(text('ASTROFORMULATRON')),
-      h3(text('An astronomy calculator by Xing')),
-      ul(Object.entries(formulae).map(([f_id, f]) => 
-        li({id: f_id}, form([
-          text(f.name),
-          ul(Object.entries(f.variables).map(([v_id, v]) => 
-            li({id: f_id}, label([
-              text(v.prefix || '🌃 '),
-              text(v.name + " " + v.symbol + " = "),
+      span(text('An astronomy calculator by Xing')),
+      ul({class: "forms"}, Object.entries(formulae).map(([f_id, f]) => 
+        li({class: "form", id: f_id}, form([
+          h3(text(f.name)),
+          ul({class: "variables"}, Object.entries(f.variables).map(([v_id, v]) => 
+            li({class: "variable", id: v_id}, label([
+              span({class: "name"}, text(v.name)),
+              span({class: "prefix"}, text(v.prefix || '')),
+              span({class: "symbol"}, text(v.symbol)),
+              span(text("=")),
               input({
                 type: "number", 
-                value: v.value,
+                name: "mantissa",
+                value: v.mantissa,
+                oninput: Calculate(f_id, v_id),
+                onfocus: Reorder(f_id, v_id),
+              }),
+              text(" × 10"),
+              input({
+                type: "number",
+                name: "exponent",
+                value: v.exponent,
                 oninput: Calculate(f_id, v_id),
                 onfocus: Reorder(f_id, v_id),
               }),
