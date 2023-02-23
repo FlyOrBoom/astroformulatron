@@ -8,7 +8,9 @@ import {
   input,
   ul, li,
   summary, details,
+  select, option,
 } from "https://unpkg.com/@hyperapp/html?module"
+import Qty from "/quantities.mjs"
 
 const inrange = (a, x, b) => (a <= x) && (x <= b)
 const log10 = (x) => Math.log(x) / Math.log(10)
@@ -32,19 +34,19 @@ const data = {
           m: {
             name: "apparent magnitude",
             symbol: "m",
-            value: 5, mantissa: 5, exponent: 0,
+            value: 5,
             formula: ({ d, M }) => ( (5*log10(d) - 5) + M ),
           },
           M: {
             name: "absolute magnitude",
             symbol: "M",
-            value: -5, mantissa: -5, exponent: 0,
+            value: -5,
             formula: ({ d, m }) => ( m - (5*log10(d) - 5) ),
           },
           d: {
             name: "distance",
             symbol: "d",
-            value: 1000, mantissa: 1, exponent: 3,
+            value: 1000,
             unit: "parsecs",
             formula: ({ m, M }) => ( Math.pow(10, (m - M + 5) / 5) ),
           },
@@ -58,22 +60,22 @@ const data = {
           θ: {
             name: "angular diameter ",
             symbol: "θ",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "arcseconds",
             formula: ({ d, D }) => ( 206265*d/D ),
           },
           d: {
             name: "linear diameter",
             symbol: "d",
-            value: 5, mantissa: 5, exponent: 0,
-            unit: "$Length",
+            value: 5,
+            unit: "centimeters",
             formula: ({ θ, D }) => ( θ*D/206265 ),
           },
           D: {
             name: "distance",
             symbol: "D",
-            value: 1e5, mantissa: 1, exponent: 5,
-            unit: "$Length",
+            value: 1e5,
+            unit: "centimeters",
             formula: ({ θ, d }) => ( d*206265/θ )
           },
         },
@@ -86,14 +88,14 @@ const data = {
           d: {
             name: "distance",
             symbol: "d",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "parsecs",
             formula: ({ p }) => ( 1/p ),
           },
           p: {
             name: "parallax",
             symbol: "p",
-            value: 0.1, mantissa: 1, exponent: -1,
+            value: 0.1,
             unit: "arcseconds",
             formula: ({ d }) => ( 1/d ),
           },
@@ -107,28 +109,28 @@ const data = {
           L1: {
             name: "1's luminosity",
             symbol: "L₁",
-            value: 3e+11, mantissa: 3, exponent: 10,
+            value: 3e+11,
             unit: "Watts",
             formula: ({ L2, M2, M1 }) => ( L2 * Math.pow(100, (M2 - M1) / 5) ),
           },
           L2: {
             name: "2's luminosity",
             symbol: "L₂",
-            value: 3e+8, mantissa: 1, exponent: 8,
+            value: 3e+8,
             unit: "Watts",
             formula: ({ L1, M2, M1 }) => ( L1 / Math.pow(100, (M2 - M1) / 5) ),
           },
           M1: {
             name: "1's magnitude",
             symbol: "M₁",
-            value: 1e+1, mantissa: 1, exponent: 1,
+            value: 1e+1,
             unit: "",
             formula: ({ L1, L2, M2 }) => ( M2 - 2.5 * log10(L1 / L2) ),
           },
           M2: {
             name: "2's magnitude",
             symbol: "M₂",
-            value: 1.5e+1, mantissa: 1.5, exponent: 1,
+            value: 1.5e+1,
             unit: "",
             formula: ({ L1, L2, M1 }) => ( M1 + 2.5 * log10(L1 / L2) ),
           },
@@ -142,7 +144,7 @@ const data = {
           L: {
             name: "luminosity",
             symbol: "L",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "L⊙",
             formula: ({ M }) => ( 
                 inrange(0.00, M, 0.43) ? 0.23 * Math.pow(M, 2.3)
@@ -155,7 +157,7 @@ const data = {
           M: {
             name: "mass",
             symbol: "M",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "M⊙",
             formula: ({ L }) => ( Math.pow(L/1.40, 1/3.5) ),
           },
@@ -169,28 +171,28 @@ const data = {
           L: {
             name: "luminosity",
             symbol: "L",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "Watts",
             formula: ({ R, F }) => ( 4 * PI * (R*R) * F),
           },
           R: {
             name: "radius",
             symbol: "R",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "meters",
             formula: ({ L, F }) => ( Math.sqrt(L / (4 * PI * F)) ),
           },
           F: {
             name: "flux",
             symbol: "F",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "Watts / meters²",
             formula: ({ T }) => ( STEFAN * T*T*T*T )
           },
           T: {
             name: "temperature",
             symbol: "T",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "meters",
             formula: ({ F }) => ( Math.pow(F/STEFAN, 0.25) ),
           },
@@ -204,14 +206,14 @@ const data = {
           λ: {
             name: "peak wavelength",
             symbol: "λ",
-            value: 0.05, mantissa: 5, exponent: -2,
+            value: 0.05,
             unit: "meters",
             formula: ({ T }) => ( WIEN / T ),
           },
           T: {
             name: "temperature",
             symbol: "T",
-            value: 0.06, mantissa: 6, exponent: -2,
+            value: 0.06,
             unit: "Kelvin",
             formula: ({ λ }) => ( WIEN / λ ),
           },
@@ -225,14 +227,14 @@ const data = {
           L: {
             name: "luminosity",
             symbol: "L",
-            value: 32000, mantissa: 3.2, exponent: 4,
+            value: 32000,
             unit: "L⊙",
             formula: ({ M }) => ( EDDINGTON * M ),
           },
           M: {
             name: "mass",
             symbol: "M",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "M⊙",
             formula: ({ L }) => ( L / EDDINGTON ),
           },
@@ -245,14 +247,14 @@ const data = {
           M_V: {
             name: "visual absolute magnitude",
             symbol: "Mᵥ",
-            value: -4.05, mantissa: -4.05, exponent: 0,
+            value: -4.05,
             unit: "",
             formula: ({ P }) => ( -2.43 * (log10(P) - 1) - 4.05 ),
           },
           P: {
             name: "period",
             symbol: "P",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "days",
             formula: ({ M_V }) => ( Math.pow(10, (M_V + 4.05)/(-2.43) + 1) ),
           },
@@ -265,14 +267,14 @@ const data = {
           M_V: {
             name: "visual absolute magnitude",
             symbol: "Mᵥ",
-            value: -2.66, mantissa: -2.66, exponent: 0,
+            value: -2.66,
             unit: "",
             formula: ({ P }) => ( -2.81 * log10(P) + 0.15 ),
           },
           P: {
             name: "period",
             symbol: "P",
-            value: 10, mantissa: 1, exponent: 1,
+            value: 10,
             unit: "days",
             formula: ({ M_V }) => ( Math.pow(10, (M_V + 0.15)/(-2.81)) ),
           },
@@ -286,14 +288,14 @@ const data = {
           t: {
             name: "lifespan",
             symbol: "t",
-            value: 1e+10, mantissa: 1, exponent: 10,
+            value: 1e+10,
             unit: "years",
             formula: ({ M }) => ( Math.pow(M, 2.5) * 1E10 ),
           },
           M: {
             name: "mass",
             symbol: "M",
-            value: 1e+1, mantissa: 1, exponent: 1,
+            value: 1e+1,
             unit: "M⊙",
             formula: ({ t }) => ( Math.pow(t*1E-10, 1/2.5) ),
           },
@@ -312,43 +314,43 @@ const data = {
           x1: {
             name: "1's position",
             symbol: "x₁",
-            value: 1, mantissa: 1, exponent: 0,
-            unit: "$Length",
+            value: 1,
+            unit: "meters",
             formula: ({ m1, m2, x2, X }) => ( (X*(m1 + m2) - x2*m2)/m1 ),
           },
           x2: {
             name: "2's position",
             symbol: "x₂",
-            value: 3, mantissa: 3, exponent: 0,
-            unit: "$Length",
+            value: 3,
+            unit: "meters",
             formula: ({ m1, m2, x1, X }) => ( (X*(m1 + m2) - x1*m1)/m2 ),
           },
           m1: {
             name: "1's mass",
             symbol: "m₁",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "$Mass",
             formula: ({ m2, x1, x2, X }) => ( m2 * (x2 - X) / (X - x1) ),
           },
           m2: {
             name: "2's mass",
             symbol: "m₂",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "$Mass",
             formula: ({ m1, x1, x2, X }) => ( m1 * (x1 - X) / (X - x2) ),
           },          
           µ: {
             name: "reduced mass",
             symbol: "µ",
-            value: 5e-1, mantissa: 5, exponent: -1,
+            value: 5e-1,
             unit: "Mass",
             formula: ({ m1, m2 }) => ( m1*m2 / (m1+m2) ),
           },
           X: {
             name: "center of mass",
             symbol: "X",
-            value: 2, mantissa: 2, exponent: 0,
-            unit: "$Length",
+            value: 2,
+            unit: "meters",
             formula: ({ m1, m2, x1, x2 }) => ( (m1*x1 + m2*x2) / (m1 + m2) ),
           },
         },
@@ -361,28 +363,28 @@ const data = {
           m1: {
             name: "1's mass",
             symbol: "m₁",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "kilograms",
             formula: ({ m2, F, r }) => ( F*r*r/G/m2 ),
           },
           m2: {
             name: "2's mass",
             symbol: "m₂",
-            value: 2e15, mantissa: 2, exponent: 15,
+            value: 2e15,
             unit: "kilograms",
             formula: ({ m1, F, r }) => ( F*r*r/G/m1 ),
           },          
           r: {
             name: "distance",
             symbol: "r",
-            value: 60, mantissa: 6, exponent: 1,
+            value: 60,
             unit: "meters",
             formula: ({ m1, m2, F }) => ( Math.sqrt(G*m1*m2/F) ),
           },
           F: {
             name: "gravitational force",
             symbol: "F",
-            value: 37, mantissa: 3.7, exponent: 1,
+            value: 37,
             unit: "Newtons",
             formula: ({ m1, m2, r }) => ( G*m1*m2/r/r ),
           },
@@ -396,35 +398,35 @@ const data = {
           m1: {
             name: "1's mass",
             symbol: "m₁",
-            value: 1e10, mantissa: 1, exponent: 10,
+            value: 1e10,
             unit: "kilograms",
             formula: ({ m2, a, r, v }) => ( v*v/G/(2/r - 1/a) - m2 ),
           },
           m2: {
             name: "2's mass",
             symbol: "m₂",
-            value: 2e10, mantissa: 2, exponent: 10,
+            value: 2e10,
             unit: "kilograms",
             formula: ({ m1, a, r, v }) => ( v*v/G/(2/r - 1/a) - m1 ),
           },          
           r: {
             name: "distance",
             symbol: "r",
-            value: 2, mantissa: 2, exponent: 0,
+            value: 2,
             unit: "meters",
             formula: ({ m1, m2, a, v }) => ( 2/(v*v/G/(m1 + m2) + 1/a) ),
           },
           a: {
             name: "semi-major axis",
             symbol: "a",
-            value: 3, mantissa: 3, exponent: 0,
+            value: 3,
             unit: "meters",
             formula: ({ m1, m2, r, v }) => ( 1/(2/r - v*v/G/(m1 + m2)) ),
           },
           v: {
             name: "orbital speed",
             symbol: "v",
-            value: 1.15, mantissa: 1.15, exponent: 0,
+            value: 1.15,
             unit: "meters/second",
             formula: ({ m1, m2, r, a }) => ( Math.sqrt(G*(m1+m2)*(2/r - 1/a)) ),
           },
@@ -443,14 +445,14 @@ const data = {
           v: {
             name: "recessional speed",
             symbol: "v",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "kilometers/second",
             formula: ({ d }) => ( HUBBLE*d ),
           },
           d: {
             name: "distance",
             symbol: "d",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "megaparsecs",
             formula: ({ v }) => ( v/HUBBLE ),
           },
@@ -464,21 +466,21 @@ const data = {
           d: {
             name: "distance",
             symbol: "d",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "parsecs",
             formula: ({ v, µ }) => ( v / 4.72 / µ ),
           },
           µ: {
             name: "proper motion",
             symbol: "µ",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "arcseconds/year",
             formula: ({ v, d }) => ( v / 4.72 / d ),
           },
           v: {
             name: "tangential speed",
             symbol: "v",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "kilometers/second",
             formula: ({ µ, d }) => ( 4.72 * µ * d ),
           },
@@ -492,14 +494,14 @@ const data = {
           t: {
             name: "age",
             symbol: "t",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "years",
             formula: ({ H }) => ( 1e12 / H ),
           },
           H: {
             name: "Hubble constant",
             symbol: "H",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "kilometers/second/megaparsec",
             formula: ({ t }) => ( 1e12 / t ),
           }
@@ -513,21 +515,21 @@ const data = {
           λ: {
             name: "wavelength",
             symbol: "λ",
-            value: 2, mantissa: 2, exponent: 0,
-            unit: "$Length",
+            value: 2,
+            unit: "meters",
             formula: ({ λ0, z }) => ( λ0*(z + 1) ),
           },
           λ0: {
             name: "original wavelength",
             symbol: "λ₀",
-            value: 1, mantissa: 1, exponent: 0,
-            unit: "$Length",
+            value: 1,
+            unit: "meters",
             formula: ({ λ, z }) => ( λ/(z + 1) ),
           },
           z: {
             name: "z-factor",
             symbol: "z",
-            value: 1, mantissa: 1, exponent: 0,
+            value: 1,
             unit: "",
             formula: ({ λ, λ0 }) => ( λ/λ0 - 1 ),
           },
@@ -546,22 +548,22 @@ const data = {
           θ: {
             name: "angular resolution",
             symbol: "θ",
-            value: 1.22, mantissa: 1.22, exponent: 0,
+            value: 1.22,
             unit: "radians",
             formula: ({ λ, D }) => ( 1.22*λ/D ),
           },
           λ: {
             name: "wavelength",
             symbol: "λ",
-            value: 1, mantissa: 1, exponent: 0,
-            unit: "$Length",
+            value: 1,
+            unit: "nanometers",
             formula: ({ θ, D }) => ( θ*D/1.22 ),
           },
           D: {
             name: "lens diameter",
             symbol: "D",
-            value: 1, mantissa: 1, exponent: 0,
-            unit: "$Length",
+            value: 1,
+            unit: "nanometers",
             formula: ({ θ, λ }) => ( 1.22*λ/θ )
           },
         },
@@ -582,14 +584,38 @@ const num_to_scientific = (x) => {
   }
 }
 
+for (const group_id in data) {
+  const group = data[group_id]
+  for (const form_id in group.forms) {
+    const form = group.forms[form_id]
+    for (const variable_id in form.variables) {
+      const variable = form.variables[variable_id]
+      const scientific = num_to_scientific(variable.value)
+      variable.mantissa = Number(scientific.mantissa.toPrecision(5))
+      variable.exponent = scientific.exponent
+      variable.default_unit = variable.unit
+      variable.unit_ratio = 1
+      
+      const i = form.order.indexOf(variable_id) / (form.order.length - 1)
+      variable.prefix = (
+          i == 1 ? '➡️'
+        : i == 0 ? '⭐'
+        : ''
+      )
+    }
+  }
+}
+
+
 const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
   const form = state.data[group_id].forms[form_id]
   const variables = form.variables
   
   // Update inputted variable
   //console.log(event.target.name)
-  variables[variable_id][event.target.name] = event.target.value
-  variables[variable_id].value = variables[variable_id].mantissa * Math.pow(10, variables[variable_id].exponent)
+  const v = variables[variable_id]
+  v[event.target.name] = event.target.value
+  v.value = v.mantissa * Math.pow(10, v.exponent) / v.unit_ratio
   
   // Flatten values of variables
   const values = Object.fromEntries(Object.entries(variables).map(
@@ -603,7 +629,7 @@ const Calculate = (group_id, form_id, variable_id) => ( state, event ) => {
     let val = Number(v.formula(values))
     values[v_id] = val
     v.value = val
-    const scientific = num_to_scientific(val)
+    const scientific = num_to_scientific(val * v.unit_ratio)
     v.mantissa = Number(scientific.mantissa.toPrecision(5))
     v.exponent = scientific.exponent
   }
@@ -641,6 +667,28 @@ const sign = x => ({
   negative: x < 0,
   invalid: !isFinite(x)
 })
+
+const units = {
+  length: [ "angstroms", "nanometers", "centimeters", "meters", "kilometers", "light-year", "parsecs", "kiloparsecs", "megaparsecs" ],
+  angle: [ "degrees", "arcminutes", "arcseconds", "radians" ],
+  time: [ "seconds", "days", "years" ],
+  speed: [ "meters/second", "kilometers/second" ],
+  angular_velocity: [ "arcseconds/year" ],
+  mass: [ "kilograms" ]
+}
+const ChangeUnit = (group_id, form_id, variable_id) => (state, event) => {
+  const form = state.data[group_id].forms[form_id]
+  const variables = form.variables
+  
+  const v = variables[variable_id]
+  v.unit = event.target.value
+  v.unit_ratio = Qty(v.unit).div(Qty(v.default_unit)).toFloat()
+  return Calculate(group_id, form_id, variable_id)(state, event)
+}
+const unitDropdown = (props, unit) => 
+  select(props, units[Qty(unit).kind()].map(u => 
+    option({ selected: unit == u }, text(u))
+  ))
 
 app({
   init: { data, filter: "" },
@@ -682,7 +730,9 @@ app({
                     oninput: Calculate(g_id, f_id, v_id),
                     onfocus: Reorder(g_id, f_id, v_id),
                   }),
-                  v.unit && text(v.unit)
+                  v.unit && Qty.parse(v.unit) && unitDropdown({
+                    oninput: ChangeUnit(g_id, f_id, v_id)
+                  }, v.unit)
                 ]))
               ))
             ]))
