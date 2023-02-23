@@ -47,6 +47,7 @@ const units = {
   speed: { // base: m/s
     "meters/second": 1,
     "kilometers/second": 1e3,
+    "c": 299792458,
   },
   frequency: { // base: hertz
     "hertz": 1,
