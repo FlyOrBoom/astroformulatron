@@ -12,6 +12,14 @@ h1 {
   color: black;
   background: white;
 }
+#filter {
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  border: 2px solid #333;
+  padding: 0.2rem;
+  border-radius: 0.3rem;
+}
 .form {
   margin: 2rem 0;
 }
@@ -38,15 +46,18 @@ h1 {
   text-align: right;
   color: white;
 }
-input[type=number] {
-  text-align: right;
-  width: 5rem;
+input {
   background: black;
   font-size: inherit;
-  font-family: Monospace, monospace;
+  font-family: inherit;
   border-radius: 0.2rem;
   border: none;
   color: white;
+}
+input[type=number] {
+  text-align: right;
+  width: 5rem;
+  font-family: Monospace, monospace;
 }
 input[name=exponent] {
   transform: translateY(-0.5rem);
@@ -59,6 +70,13 @@ a, a:visited {
 a:hover, a:focus {
   text-decoration: underline;
 }
+h3 {
+  display: inline;
+}
+details > span {
+  font-family: serif;
+  color: #ccc;
+}
     </style>
   </head>
   <body>
@@ -68,7 +86,7 @@ import { app } from "https://unpkg.com/hyperapp"
 import {
   main, section,
   h1, h2, h3,
-  text, span, a,
+  text, span, a, p,
   label,
   form,
   input,
@@ -696,17 +714,23 @@ const Reorder = (group_id, form_id, variable_id) => ( state, event ) => {
   return { ...state }
 }
 
+const compress_match = q => q.replaceAll(/\W/g,"")
+const Filter = (state, event) => {
+  state.filter = compress_match(event.target.value)
+  return { ...state }
+}
+
 app({
-  init: data,
-  view: (state) =>
+  init: { data, filter: "" },
+  view: ({ data, filter }) =>
     main([
       h1(text('ASTROFORMULATRON')),
-      span(text('An astronomy calculator by Xing')),
-      ...Object.entries(state).map(([g_id, g]) => 
+      p(text('An astronomy calculator by Xing')),
+      ...Object.entries(data).map(([g_id, g]) => 
         section({class: "group", id: g_id}, [
           h2(a({href: "#"+g_id}, text(g.name))),
           ul({class: "forms"}, Object.entries(g.forms).map(([f_id, f]) => 
-            li({class: "form", id: f_id}, form([
+            compress_match(f.name).includes(filter) && li({class: "form", id: f_id}, form([
               details([
                 summary(h3(text(f.name))),
                 f.description && span(text(f.description))
@@ -740,11 +764,20 @@ app({
             ]))
           )),
       ])),
-      text("Made with hyperapp.js")
+      input({id: "filter", type: "text", placeholder: "🔍", oninput: Filter}),
+      p([
+        text("Made by "),
+        a({href: "https://x-ing.space"}, text("Xing")),
+        text(" in 2023 with "),
+        a({href: "https://flems.io"}, text("flems.io")),
+        text(" and "),
+        a({href: "https://github.com/jorgebucaran/hyperapp"}, text("hyperapp.js")),
+      ]),
     ])
   ,
   node: document.getElementById("app"),
 })
+
 
     </script>
   </body>
