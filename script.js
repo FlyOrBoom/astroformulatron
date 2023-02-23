@@ -1,4 +1,4 @@
-import { app, text } from "/hyperapp.mjs"
+import { app, text } from "./hyperapp.mjs"
 import {
   main, section,
   h1, h2, h3,
@@ -6,8 +6,8 @@ import {
   label, form, input, select, option,
   ul, li,
   summary, details,
-} from "/hyperapp-html.mjs"
-import Qty from "/quantities.mjs"
+} from "./hyperapp-html.mjs"
+import Qty from "./quantities.mjs"
 
 const inrange = (a, x, b) => (a <= x) && (x <= b)
 const log10 = (x) => Math.log(x) / Math.log(10)
